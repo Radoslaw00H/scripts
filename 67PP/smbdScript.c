@@ -187,27 +187,34 @@ int main(void) {
     fgets(confirm, sizeof(confirm), stdin);
     
     if (confirm[0] == 'y' || confirm[0] == 'Y') {
-        char ip_addr[50];
-        char netmask[50];
+        char ip_cidr[50];
         char interface[50];
         char dhcp_choice[10];
+        FILE *detect_fp;
         
         system("clear");
         printf("[NETPLAN] Konfiguracja sieci\n\n");
         
-        printf("Interfejs [eth0]: ");
-        fgets(input, sizeof(input), stdin);
-        if (input[0] != '\n') {
-            input[strcspn(input, "\n")] = 0;
-            strcpy(interface, input);
+        // Wykrywanie interfejsu - prefer enp0s3 lub enp0s2
+        strcpy(interface, "");
+        if (system("test -d /sys/class/net/enp0s3") == 0) {
+            strcpy(interface, "enp0s3");
+        } else if (system("test -d /sys/class/net/enp0s2") == 0) {
+            strcpy(interface, "enp0s2");
         } else {
-            strcpy(interface, "eth0");
+            detect_fp = popen("ip route | grep default | awk '{print $5}'", "r");
+            if (detect_fp != NULL) {
+                fgets(interface, sizeof(interface), detect_fp);
+                interface[strcspn(interface, "\n")] = 0;
+                pclose(detect_fp);
+            }
         }
+        printf("[NETPLAN] Interfejs: %s\n\n", interface);
         
         printf("Uzyj DHCP? [y/n]: ");
         fgets(dhcp_choice, sizeof(dhcp_choice), stdin);
         
-        fp = fopen("/etc/netplan/01-netcfg.yaml", "w");
+        fp = fopen("/etc/netplan/50-cloud-init.yaml", "w");
         if (fp == NULL) {
             perror("Cannot create netplan config");
             return 1;
@@ -221,22 +228,13 @@ int main(void) {
             fprintf(fp, "      dhcp4: true\n");
             printf("[NETPLAN] DHCP4 wlaczony\n");
         } else {
-            printf("IP [192.168.1.10]: ");
+            printf("IP/maska [192.168.1.10/24]: ");
             fgets(input, sizeof(input), stdin);
             if (input[0] != '\n') {
                 input[strcspn(input, "\n")] = 0;
-                strcpy(ip_addr, input);
+                strcpy(ip_cidr, input);
             } else {
-                strcpy(ip_addr, "192.168.1.10");
-            }
-            
-            printf("Maska [255.255.255.0]: ");
-            fgets(input, sizeof(input), stdin);
-            if (input[0] != '\n') {
-                input[strcspn(input, "\n")] = 0;
-                strcpy(netmask, input);
-            } else {
-                strcpy(netmask, "255.255.255.0");
+                strcpy(ip_cidr, "192.168.1.10/24");
             }
             
             fprintf(fp, "network:\n");
@@ -245,11 +243,11 @@ int main(void) {
             fprintf(fp, "    %s:\n", interface);
             fprintf(fp, "      dhcp4: false\n");
             fprintf(fp, "      addresses:\n");
-            fprintf(fp, "        - address: %s/24\n", ip_addr);
+            fprintf(fp, "        - address: %s\n", ip_cidr);
             fprintf(fp, "      gateway4: 192.168.1.1\n");
             fprintf(fp, "      nameservers:\n");
             fprintf(fp, "        addresses: [8.8.8.8, 8.8.4.4]\n");
-            printf("[NETPLAN] IP: %s, Maska: %s\n", ip_addr, netmask);
+            printf("[NETPLAN] IP: %s\n", ip_cidr);
         }
         
         fclose(fp);
