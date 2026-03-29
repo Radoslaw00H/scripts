@@ -256,5 +256,14 @@ int main(void) {
         system("clear");
     }
     
+    // ========== USUWANIE PLIKU ==========
+    printf("Usunac plik 'a' z /home/? [y/n]: ");
+    fgets(confirm, sizeof(confirm), stdin);
+    
+    if (confirm[0] == 'y' || confirm[0] == 'Y') {
+        system("rm /home/a");
+        printf("[OK] Plik usuniety\n");
+    }
+    
     return 0;
 }
