@@ -142,7 +142,7 @@ int main(void) {
         return 1;
     }
 
-    /* ========== KROK 12: USTAWIENIE SERVER STRING ==========
+    // ========== KROK 12: USTAWIENIE SERVER STRING ==========
     printf("[12] server string\n");
     
     fp = fopen("/etc/samba/smb.conf", "a");
@@ -151,7 +151,7 @@ int main(void) {
         return 1;
     }
     
-    fprintf(fp, "\nserver string = Samba Server\n");*/
+    fprintf(fp, "\nserver string = Samba Server\n");
 
     // ========== KROK 13: SEKCJA [UŻYTKOWNIK 1] ==========
     printf("[13] [%s]\n", user1);
@@ -255,6 +255,7 @@ int main(void) {
         fclose(fp);
         printf("[NETPLAN] netplan apply\n");
         system("netplan apply");
+        system("clear");
     }
     
     return 0;
