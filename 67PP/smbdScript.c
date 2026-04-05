@@ -1,68 +1,68 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 // ======================== KOLORY ANSI ========================
-#define C_RESET   "\033[0m"
-#define C_BOLD    "\033[1m"
-#define C_DIM     "\033[2m"
-#define C_GREEN   "\033[32m"
-#define C_YELLOW  "\033[33m"
-#define C_CYAN    "\033[36m"
-#define C_RED     "\033[31m"
-#define C_BGREEN  "\033[1;32m"
+#define C_RESET "\033[0m"
+#define C_BOLD "\033[1m"
+#define C_DIM "\033[2m"
+#define C_GREEN "\033[32m"
+#define C_YELLOW "\033[33m"
+#define C_CYAN "\033[36m"
+#define C_RED "\033[31m"
+#define C_BGREEN "\033[1;32m"
 #define C_BYELLOW "\033[1;33m"
-#define C_BCYAN   "\033[1;36m"
-#define C_BRED    "\033[1;31m"
-#define C_BWHITE  "\033[1;37m"
+#define C_BCYAN "\033[1;36m"
+#define C_BRED "\033[1;31m"
+#define C_BWHITE "\033[1;37m"
 
 // ======================== UI HELPERS ========================
 
 void print_box(const char *title) {
   int len = (int)strlen(title);
   int box_w = len + 6;
-  if (box_w < 54) box_w = 54;
+  if (box_w < 54)
+    box_w = 54;
   int pad_left = (box_w - 2 - len) / 2;
   int pad_right = box_w - 2 - len - pad_left;
 
   printf("\n" C_BCYAN);
   // top
   printf("  ╔");
-  for (int i = 0; i < box_w - 2; i++) printf("═");
+  for (int i = 0; i < box_w - 2; i++)
+    printf("═");
   printf("╗\n");
   // middle
   printf("  ║");
-  for (int i = 0; i < pad_left; i++) printf(" ");
+  for (int i = 0; i < pad_left; i++)
+    printf(" ");
   printf(C_BWHITE "%s" C_BCYAN, title);
-  for (int i = 0; i < pad_right; i++) printf(" ");
+  for (int i = 0; i < pad_right; i++)
+    printf(" ");
   printf("║\n");
   // bottom
   printf("  ╚");
-  for (int i = 0; i < box_w - 2; i++) printf("═");
+  for (int i = 0; i < box_w - 2; i++)
+    printf("═");
   printf("╝" C_RESET "\n\n");
 }
 
 void print_separator(void) {
-  printf(C_DIM "  ────────────────────────────────────────────────────" C_RESET "\n");
+  printf(C_DIM "  ────────────────────────────────────────────────────" C_RESET
+               "\n");
 }
 
 void print_step(int num, const char *desc) {
   printf(C_BYELLOW "  ⏳ [KROK %d] " C_RESET "%s\n", num, desc);
 }
 
-void print_ok(const char *msg) {
-  printf(C_BGREEN "  ✔ " C_RESET "%s\n", msg);
-}
+void print_ok(const char *msg) { printf(C_BGREEN "  ✔ " C_RESET "%s\n", msg); }
 
-void print_fail(const char *msg) {
-  printf(C_BRED "  ✘ " C_RESET "%s\n", msg);
-}
+void print_fail(const char *msg) { printf(C_BRED "  ✘ " C_RESET "%s\n", msg); }
 
-void print_info(const char *msg) {
-  printf(C_BCYAN "  ℹ " C_RESET "%s\n", msg);
-}
+void print_info(const char *msg) { printf(C_BCYAN "  ℹ " C_RESET "%s\n", msg); }
 
 // Pasek postepu z animacja - uruchamia komende w tle
 // bar_w = szerokosc paska (ilosc znakow), msg = opis
@@ -96,7 +96,8 @@ int run_with_progress(const char *command, const char *msg) {
   while (waitpid(pid, &status, WNOHANG) == 0) {
     // Oblicz ile wypelnic (efekt pulsacji)
     int filled = pos;
-    if (filled > bar_w) filled = bar_w;
+    if (filled > bar_w)
+      filled = bar_w;
 
     printf("\r  [");
     for (int i = 0; i < bar_w; i++) {
@@ -108,7 +109,8 @@ int run_with_progress(const char *command, const char *msg) {
 
     // Pseudo procent (pulsujacy 0-95%)
     int pct = (pos * 95) / bar_w;
-    if (pct > 95) pct = 95;
+    if (pct > 95)
+      pct = 95;
 
     printf(" " C_BYELLOW "%3d%%" C_RESET, pct);
     fflush(stdout);
@@ -200,7 +202,8 @@ int main(void) {
 
   printf("\n");
   print_step(1, "Aktualizacja systemu...");
-  if (run_with_progress("apt update -y", "Aktualizowanie listy pakietow...") != 0) {
+  if (run_with_progress("apt update -y", "Aktualizowanie listy pakietow...") !=
+      0) {
     print_fail("Blad podczas aktualizacji! Sprawdz polaczenie z siecia.");
   } else {
     print_ok("System zaktualizowany");
@@ -208,7 +211,8 @@ int main(void) {
 
   printf("\n");
   print_step(2, "Instalacja Samby...");
-  if (run_with_progress("apt install -y samba", "Instalowanie uslugi Samba...") != 0) {
+  if (run_with_progress("apt install -y samba",
+                        "Instalowanie uslugi Samba...") != 0) {
     print_fail("Blad podczas instalacji Samba!");
     return 1;
   }
@@ -216,7 +220,8 @@ int main(void) {
 
   printf("\n");
   print_step(3, "Sprawdzanie statusu smbd...");
-  if (run_with_progress("systemctl status smbd > /dev/null 2>&1", "Weryfikacja uslugi smbd...") != 0) {
+  if (run_with_progress("systemctl status smbd > /dev/null 2>&1",
+                        "Weryfikacja uslugi smbd...") != 0) {
     print_fail("Usluga smbd nie dziala - kontynuuje...");
   } else {
     print_ok("Usluga smbd aktywna");
@@ -254,16 +259,25 @@ int main(void) {
   print_box("PODSUMOWANIE KONFIGURACJI");
 
   printf(C_BWHITE "  ┌──────────────────┬──────────────────────────────┐\n");
-  printf("  │   Parametr        │   Wartosc                    │\n");
+  printf("  │   Parametr       │   Wartosc                    │\n");
   printf("  ├──────────────────┼──────────────────────────────┤\n");
-  printf("  │ " C_CYAN "Uzytkownik 1" C_BWHITE "     │ " C_GREEN "%-28s" C_BWHITE " │\n", user1);
-  printf("  │ " C_DIM "  uprawnienia" C_BWHITE "    │ " C_YELLOW "chmod 750" C_BWHITE "                    │\n");
+  printf("  │ " C_CYAN "Uzytkownik 1" C_BWHITE "     │ " C_GREEN
+         "%-28s" C_BWHITE " │\n",
+         user1);
+  printf("  │ " C_DIM "  uprawnienia" C_BWHITE "    │ " C_YELLOW
+         "chmod 750" C_BWHITE "                    │\n");
   printf("  ├──────────────────┼──────────────────────────────┤\n");
-  printf("  │ " C_CYAN "Uzytkownik 2" C_BWHITE "     │ " C_GREEN "%-28s" C_BWHITE " │\n", user2);
-  printf("  │ " C_DIM "  uprawnienia" C_BWHITE "    │ " C_YELLOW "chmod 770" C_BWHITE "                    │\n");
+  printf("  │ " C_CYAN "Uzytkownik 2" C_BWHITE "     │ " C_GREEN
+         "%-28s" C_BWHITE " │\n",
+         user2);
+  printf("  │ " C_DIM "  uprawnienia" C_BWHITE "    │ " C_YELLOW
+         "chmod 770" C_BWHITE "                    │\n");
   printf("  ├──────────────────┼──────────────────────────────┤\n");
-  printf("  │ " C_CYAN "Grupa" C_BWHITE "            │ " C_GREEN "%-28s" C_BWHITE " │\n", group);
-  printf("  └──────────────────┴──────────────────────────────┘" C_RESET "\n\n");
+  printf("  │ " C_CYAN "Grupa" C_BWHITE "            │ " C_GREEN
+         "%-28s" C_BWHITE " │\n",
+         group);
+  printf("  └──────────────────┴──────────────────────────────┘" C_RESET
+         "\n\n");
 
   if (!prompt_yn("Potwierdzasz konfiguracje?")) {
     printf("\n");
@@ -298,10 +312,12 @@ int main(void) {
   snprintf(cmd, sizeof(cmd), "groupadd %s 2>/dev/null", group);
   run_quick(cmd, "groupadd");
 
-  snprintf(cmd, sizeof(cmd), "useradd -M -s /sbin/nologin %s 2>/dev/null", user1);
+  snprintf(cmd, sizeof(cmd), "useradd -M -s /sbin/nologin %s 2>/dev/null",
+           user1);
   run_quick(cmd, "useradd");
 
-  snprintf(cmd, sizeof(cmd), "useradd -M -s /sbin/nologin %s 2>/dev/null", user2);
+  snprintf(cmd, sizeof(cmd), "useradd -M -s /sbin/nologin %s 2>/dev/null",
+           user2);
   run_quick(cmd, "useradd");
 
   snprintf(cmd, sizeof(cmd), "usermod -aG %s %s", group, user1);
@@ -369,7 +385,7 @@ int main(void) {
   printf("\n");
   print_step(11, "Tworzenie kopii zapasowej smb.conf...");
   if (run_quick("cp /etc/samba/smb.conf /etc/samba/smb.conf.bak",
-                 "cp smb.conf.bak") != 0) {
+                "cp smb.conf.bak") != 0) {
     print_fail("Nie udalo sie utworzyc kopii zapasowej!");
     return 1;
   }
@@ -419,7 +435,8 @@ int main(void) {
   // ---- KROK 15: Restart smbd ----
   printf("\n");
   print_step(15, "Restartowanie uslugi smbd...");
-  if (run_with_progress("systemctl restart smbd", "Restartowanie Samba...") != 0) {
+  if (run_with_progress("systemctl restart smbd", "Restartowanie Samba...") !=
+      0) {
     print_fail("Blad podczas restartu smbd!");
   } else {
     print_ok("Usluga smbd zrestartowana");
@@ -452,10 +469,10 @@ int main(void) {
 
     // 1) Sprawdz z istniejacego pliku netplan
     strcpy(interface, "");
-    detect_fp = popen(
-        "grep -rh '^ *enp[a-z0-9]*' /etc/netplan/*.yaml 2>/dev/null "
-        "| head -1 | sed 's/[: ]//g'",
-        "r");
+    detect_fp =
+        popen("grep -rh '^ *enp[a-z0-9]*' /etc/netplan/*.yaml 2>/dev/null "
+              "| head -1 | sed 's/[: ]//g'",
+              "r");
     if (detect_fp != NULL) {
       fgets(interface, sizeof(interface), detect_fp);
       interface[strcspn(interface, "\n")] = 0;
@@ -463,10 +480,9 @@ int main(void) {
     }
     // 2) Fallback - ip a
     if (strlen(interface) == 0) {
-      detect_fp = popen(
-          "ip -o link show | awk -F': ' '{print $2}' "
-          "| grep -v lo | head -1",
-          "r");
+      detect_fp = popen("ip -o link show | awk -F': ' '{print $2}' "
+                        "| grep -v lo | head -1",
+                        "r");
       if (detect_fp != NULL) {
         fgets(interface, sizeof(interface), detect_fp);
         interface[strcspn(interface, "\n")] = 0;
@@ -478,13 +494,20 @@ int main(void) {
       strcpy(interface, "enp0s3");
     }
 
-    printf(C_BGREEN "  ✔ " C_RESET "Wykryty interfejs: " C_BWHITE "%s" C_RESET "\n\n", interface);
+    printf(C_BGREEN "  ✔ " C_RESET "Wykryty interfejs: " C_BWHITE "%s" C_RESET
+                    "\n\n",
+           interface);
 
-    // Wybor pliku netplan
-    print_step(17, "Wybor pliku konfiguracyjnego netplan...");
-    has_50 = (system("ls /etc/netplan/50-*.yaml >/dev/null 2>&1") == 0);
+    // Automatycznie usun plik 01-*.yaml jesli istnieje
+    print_step(17, "Przygotowanie pliku netplan...");
     has_01 = (system("ls /etc/netplan/01-*.yaml >/dev/null 2>&1") == 0);
+    if (has_01) {
+      run_quick("rm -f /etc/netplan/01-*.yaml", "rm 01-*.yaml");
+      print_ok("Stary plik 01-*.yaml usuniety");
+    }
 
+    // Sprawdz czy jest 50-*
+    has_50 = (system("ls /etc/netplan/50-*.yaml >/dev/null 2>&1") == 0);
     if (has_50) {
       detect_fp = popen("ls /etc/netplan/50-*.yaml 2>/dev/null | head -1", "r");
       if (detect_fp != NULL) {
@@ -493,23 +516,9 @@ int main(void) {
         pclose(detect_fp);
       }
       print_ok("Znaleziono plik 50-*.yaml");
-    } else if (has_01 && !has_50) {
-      strcpy(netplan_path, "/etc/netplan/50-cloud-init.yaml");
-      printf("\n");
-      printf(C_BYELLOW "  ╔════════════════════════════════════════════════╗\n");
-      printf("  ║  " C_BWHITE "UWAGA!" C_BYELLOW "                                       ║\n");
-      printf("  ║  " C_RESET "Znaleziono plik 01-*.yaml ale brak 50-*" C_BYELLOW "    ║\n");
-      printf("  ║  " C_RESET "Tworze nowy: 50-cloud-init.yaml" C_BYELLOW "            ║\n");
-      printf("  ║                                                ║\n");
-      printf("  ║  " C_RESET "Jesli netplan nie zadziala:" C_BYELLOW "                  ║\n");
-      printf("  ║  " C_BRED "rm /etc/netplan/01-*.yaml" C_BYELLOW "                    ║\n");
-      printf("  ║  " C_RESET "a nastepnie:" C_BYELLOW "                                 ║\n");
-      printf("  ║  " C_BGREEN "netplan apply" C_BYELLOW "                                ║\n");
-      printf("  ╚════════════════════════════════════════════════╝\n" C_RESET);
-      printf("\n");
     } else {
       strcpy(netplan_path, "/etc/netplan/50-cloud-init.yaml");
-      print_info("Brak istniejacego pliku - tworze 50-cloud-init.yaml");
+      print_info("Tworze nowy plik: 50-cloud-init.yaml");
     }
 
     printf(C_DIM "     Plik: %s" C_RESET "\n\n", netplan_path);
@@ -521,7 +530,8 @@ int main(void) {
     printf("\n");
 
     // IP
-    prompt_default("Adres IP z maska", "192.168.0.1/24", ip_cidr, sizeof(ip_cidr));
+    prompt_default("Adres IP z maska", "192.168.0.1/24", ip_cidr,
+                   sizeof(ip_cidr));
     printf("\n");
 
     // Zapis YAML
@@ -555,7 +565,8 @@ int main(void) {
 
     printf("\n");
     print_step(19, "Stosowanie konfiguracji sieci...");
-    if (run_with_progress("netplan apply 2>/dev/null", "Stosowanie netplan...") != 0) {
+    if (run_with_progress("netplan apply 2>/dev/null",
+                          "Stosowanie netplan...") != 0) {
       print_fail("Blad podczas netplan apply!");
     } else {
       print_ok("Konfiguracja sieci zastosowana");
@@ -565,20 +576,6 @@ int main(void) {
     printf("\n");
     print_info("Pominieto konfiguracje netplan.");
     printf("\n");
-  }
-
-  // ==========================================
-  //  EKRAN 6: CZYSZCZENIE
-  // ==========================================
-  print_separator();
-  printf("\n");
-
-  if (prompt_yn("Usunac plik 'a' z /home/?")) {
-    if (run_quick("rm -f /home/a", "rm /home/a") == 0) {
-      print_ok("Plik usuniety");
-    } else {
-      print_fail("Nie udalo sie usunac pliku");
-    }
   }
 
   // ==========================================
@@ -594,7 +591,22 @@ int main(void) {
   printf("  │  Sprawdz status:  systemctl status smbd            │\n");
   printf("  │  Logi:            tail -f /var/log/samba/log.smbd  │\n");
   printf("  │  Restart:         systemctl restart smbd           │\n");
-  printf("  └────────────────────────────────────────────────────┘" C_RESET "\n\n");
+  printf("  └────────────────────────────────────────────────────┘" C_RESET
+         "\n\n");
+
+  // "TO WSZYSTKO?" 8 razy na zmiane czerwono i zielono
+  printf("\n");
+  for (int i = 0; i < 8; i++) {
+    if (i % 2 == 0)
+      printf(C_BRED "  TO WSZYSTKO?" C_RESET "\n");
+    else
+      printf(C_BGREEN "  TO WSZYSTKO?" C_RESET "\n");
+  }
+  printf("\n");
+
+  if (prompt_yn("Zakonczyc?")) {
+    system("clear");
+  }
 
   return 0;
 }
